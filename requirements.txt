@@ -1,0 +1,5 @@
+streamlit
+pdfplumber
+reportlab
+groq
+python-dotenv
