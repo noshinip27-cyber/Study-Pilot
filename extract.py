@@ -14,8 +14,10 @@ def extact_text_from_pdf(pdf_path):
                 text += page_text + "\n"
     return text
 
+
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
 def extract_syllabus(text):
     prompt = f"""
             You are a structured data explorer.
@@ -44,11 +46,11 @@ def extract_syllabus(text):
 
             {text}
         """
+    
     response = client.chat.completions.create(
                     model="llama-3.1-8b-instant",
                     messages=[{"role": "user", "content": prompt}],
-                    temperature=0.1,   
-                    max_tokens=4000        
+                    temperature=0.1            
                 )
     return response.choices[0].message.content
 
@@ -62,6 +64,7 @@ def clean_json_response(raw):
 
     return raw[start : end + 1]
 
+
 def main():
     text = extact_text_from_pdf("sample_syllabus_for_studypilot.pdf")
     ## send this text to the AI model
@@ -74,5 +77,3 @@ def main():
     print("Json has been written properly")
 
 main()
-
-    

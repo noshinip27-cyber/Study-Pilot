@@ -10,7 +10,7 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 def load_syllabus(path="syllabus.json"):
     with open(path, "r") as f:
         return json.load(f)
-
+    
 
 def calculate_priority(subject, today=None):
     if today is None:
@@ -36,6 +36,7 @@ def calculate_priority(subject, today=None):
     priority = (weightage / days_remaining) * 100
     return priority
 
+
 def allocate_hours(subjects, daily_hours=4):
     scored = []
     for subject in subjects:
@@ -60,6 +61,8 @@ def allocate_hours(subjects, daily_hours=4):
         subject["daily_minutes"] = max(minutes, 20)
 
     return scored
+
+
 def generate_weekly_plan(allocated_subjects, daily_hours=4, days_ahead=7):
     today = date.today()
 
@@ -86,10 +89,10 @@ def generate_weekly_plan(allocated_subjects, daily_hours=4, days_ahead=7):
 
             Rules:
             1. Higher priority subjects get more time each day.
-            2. Sequence chapters logically â€” foundational topics before advanced ones.
+            2. Sequence chapters logically — foundational topics before advanced ones.
             3. Include short 10-minute breaks between subjects.
             4. On days 6 and 7 (weekend), add a 30-minute revision slot for the highest priority subject.
-            5. Return ONLY valid JSON â€” no explanation, no markdown.
+            5. Return ONLY valid JSON — no explanation, no markdown.
 
             Return this exact format:
             {{
@@ -102,6 +105,7 @@ def generate_weekly_plan(allocated_subjects, daily_hours=4, days_ahead=7):
                     "subject": "string",
                     "duration_minutes": number,
                     "chapters_to_cover": ["string"],
+                    "exam_date": "YYYY-MM-DD",
                     "notes": "string"
                     }}
                 ],
@@ -132,22 +136,22 @@ def clean_json_response(raw):
 
 def display_timetable(timetable_data):
     print("\n" + "="*60)
-    print("📜 YOUR STUDY TIMETABLE")
+    print("📚 YOUR STUDY TIMETABLE")
     print("="*60)
 
     for day in timetable_data["timetable"]:
-        print(f"\n 📑 Day {day['day']} ⌚ {day['date']}")
+        print(f"\n📅 Day {day['day']} — {day['date']}")
         print("-" * 40)
         for slot in day["slots"]:
             chapters = ", ".join(slot["chapters_to_cover"])
-            print(f"  ⏳  {slot['duration_minutes']} min | {slot['subject']}")
+            print(f"  ⏱  {slot['duration_minutes']} min | {slot['subject']}")
             print(f"      Chapters: {chapters}")
             if slot.get("notes"):
                 print(f"      Note: {slot['notes']}")
         print(f"  Total: {day['total_study_minutes']} minutes")
 
     print("\n" + "="*60)
-    print("📅WEEKLY SUMMARY")
+    print("📝 WEEKLY SUMMARY")
     print(timetable_data.get("weekly_summary", ""))
     print("="*60 + "\n")
 
@@ -180,3 +184,6 @@ def main():
 
 
 main()
+
+
+
