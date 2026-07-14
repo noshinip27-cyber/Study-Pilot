@@ -9,7 +9,6 @@ from reportlab.platypus import (
 )
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
-import remainder
 from remainder import send_daily_nudge
 import os
 
@@ -285,6 +284,6 @@ def generate_pdf(rows, summary="", output_path="timetable.pdf"):
 
 
 
-rows, summary = load_timetable("timetable.json")
-generate_pdf(rows, summary, output_path="my_timetable.pdf")
-send_daily_nudge(rows, recipient_email=os.getenv("RECEIVER_EMAIL"))
+# rows, summary = load_timetable("timetable.json")
+# generate_pdf(rows, summary, output_path="my_timetable.pdf")
+# send_daily_nudge(rows, recipient_email=os.getenv("RECEIVER_EMAIL"))

@@ -119,7 +119,8 @@ def generate_weekly_plan(allocated_subjects, daily_hours=4, days_ahead=7):
     response = client.chat.completions.create(
                     model="llama-3.1-8b-instant",
                     messages=[{"role": "user", "content": prompt}],
-                    temperature=0.2
+                    temperature=0.2,
+                    max_tokens=4000
                 )
     
     return response.choices[0].message.content
@@ -183,7 +184,7 @@ def main():
     print("saved to timetable json")
 
 
-main()
+# main()
 
 
 

@@ -50,7 +50,8 @@ def extract_syllabus(text):
     response = client.chat.completions.create(
                     model="llama-3.1-8b-instant",
                     messages=[{"role": "user", "content": prompt}],
-                    temperature=0.1            
+                    temperature=0.1,
+                    max_tokens=4000
                 )
     return response.choices[0].message.content
 
@@ -64,7 +65,6 @@ def clean_json_response(raw):
 
     return raw[start : end + 1]
 
-
 def main():
     text = extact_text_from_pdf("sample_syllabus_for_studypilot.pdf")
     ## send this text to the AI model
@@ -76,4 +76,4 @@ def main():
     
     print("Json has been written properly")
 
-main()
+# main()
