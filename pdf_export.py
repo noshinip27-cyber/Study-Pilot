@@ -30,7 +30,7 @@ TEXT_DARK   = colors.HexColor('#1E293B')
 TEXT_MID    = colors.HexColor('#475569')
 TEXT_LIGHT  = colors.HexColor('#94A3B8')
 
-PAGE_W, PAGE_H = A4                    # 595 x 842 pt
+PAGE_W, PAGE_H = A4
 MARGIN = 20 * mm
 TABLE_W = PAGE_W - 2 * MARGIN
 
@@ -132,12 +132,12 @@ def build_legend(S):
                  [Paragraph(sub, S["legend_sub"])]],
                 colWidths=[45 * mm],
                 style=TableStyle([
-                    ("BACKGROUND",  (0,0), (-1,-1), bg),
-                    ("LEFTPADDING", (0,0), (-1,-1), 6),
-                    ("RIGHTPADDING",(0,0), (-1,-1), 6),
-                    ("TOPPADDING",  (0,0), (-1,-1), 5),
-                    ("BOTTOMPADDING",(0,0),(-1,-1), 5),
-                    ("LINEABOVE",   (0,0), (-1,0),  2, accent),
+                    ("BACKGROUND",   (0, 0), (-1, -1), bg),
+                    ("LEFTPADDING",  (0, 0), (-1, -1), 6),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                    ("TOPPADDING",   (0, 0), (-1, -1), 5),
+                    ("BOTTOMPADDING",(0, 0), (-1, -1), 5),
+                    ("LINEABOVE",    (0, 0), (-1,  0), 2, accent),
                     ("ROUNDEDCORNERS", [3]),
                 ])
             )
@@ -147,11 +147,11 @@ def build_legend(S):
         [cells],
         colWidths=[TABLE_W / 3] * 3,
         style=TableStyle([
-            ("LEFTPADDING",  (0,0), (-1,-1), 4),
-            ("RIGHTPADDING", (0,0), (-1,-1), 4),
-            ("TOPPADDING",   (0,0), (-1,-1), 0),
-            ("BOTTOMPADDING",(0,0), (-1,-1), 0),
-            ("VALIGN",       (0,0), (-1,-1), "MIDDLE"),
+            ("LEFTPADDING",  (0, 0), (-1, -1), 4),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+            ("TOPPADDING",   (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING",(0, 0), (-1, -1), 0),
+            ("VALIGN",       (0, 0), (-1, -1), "MIDDLE"),
         ])
     )
     return legend_table
@@ -159,17 +159,14 @@ def build_legend(S):
 
 # ── Main timetable table ─────────────────────────────────────────────────────
 def build_timetable_table(rows, S):
-    # Column widths — total = TABLE_W
-    # Date | Subject | Topics | Time | Notes
     col_w = [
-        26 * mm,   # date
-        42 * mm,   # subject
-        TABLE_W - 26*mm - 42*mm - 18*mm - 20*mm,  # topics (fills remaining)
-        18 * mm,   # time
-        20 * mm,   # notes
+        26 * mm,
+        42 * mm,
+        TABLE_W - 26*mm - 42*mm - 18*mm - 20*mm,
+        18 * mm,
+        20 * mm,
     ]
 
-    # Header row
     header = [
         Paragraph("DATE",    S["col_header"]),
         Paragraph("SUBJECT", S["col_header"]),
@@ -183,57 +180,51 @@ def build_timetable_table(rows, S):
 
     for i, row in enumerate(rows):
         zone, bg, accent = get_urgency(row["exam_date"])
-        row_idx = i + 1   # +1 for header
+        row_idx = i + 1
 
-        # Alternate very slightly on same-bg rows for readability
         fill = bg if i % 2 == 0 else colors.Color(
             bg.red * 0.97, bg.green * 0.97, bg.blue * 0.97
         )
 
-        # Format date nicely: "14 Jun\nSun"
         try:
             d = datetime.strptime(row["date"], "%Y-%m-%d")
             date_str = d.strftime("%d %b\n%a")
         except Exception:
             date_str = row["date"]
 
-        # Topic — wrap into multiple lines at commas for readability
         topic_text = row["topic"].replace(", ", "<br/>• ")
         if topic_text:
             topic_text = "• " + topic_text
 
         table_data.append([
-            Paragraph(date_str,                     S["date_cell"]),
-            Paragraph(row["subject"],               S["subject_cell"]),
-            Paragraph(topic_text,                   S["topic_cell"]),
-            Paragraph(f"{row['minutes']}<br/>min",  S["min_cell"]),
-            Paragraph(row["notes"] or "—",          S["notes_cell"]),
+            Paragraph(date_str,                    S["date_cell"]),
+            Paragraph(row["subject"],              S["subject_cell"]),
+            Paragraph(topic_text,                  S["topic_cell"]),
+            Paragraph(f"{row['minutes']}<br/>min", S["min_cell"]),
+            Paragraph(row["notes"] or "—",         S["notes_cell"]),
         ])
 
         row_styles += [
-            ("BACKGROUND",    (0, row_idx), (-1, row_idx), fill),
-            ("LINEABOVE",     (0, row_idx), (-1, row_idx), 0.5, BORDER),
-            ("LEFTPADDING",   (0, row_idx), (0, row_idx),  8),    # date indent
-            ("TEXTCOLOR",     (0, row_idx), (0, row_idx),  accent),  # date accent color
+            ("BACKGROUND",  (0, row_idx), (-1, row_idx), fill),
+            ("LINEABOVE",   (0, row_idx), (-1, row_idx), 0.5, BORDER),
+            ("LEFTPADDING", (0, row_idx), (0,  row_idx), 8),
+            ("TEXTCOLOR",   (0, row_idx), (0,  row_idx), accent),
         ]
 
     base_style = TableStyle([
-        # Header
-        ("BACKGROUND",    (0,0), (-1,0),  HEADER_BG),
-        ("TOPPADDING",    (0,0), (-1,0),  7),
-        ("BOTTOMPADDING", (0,0), (-1,0),  7),
-        ("LINEBELOW",     (0,0), (-1,0),  2, colors.HexColor("#F59E0B")),
-        # All cells
-        ("FONTNAME",      (0,0), (-1,-1), "Helvetica"),
-        ("FONTSIZE",      (0,0), (-1,-1), 8),
-        ("VALIGN",        (0,0), (-1,-1), "MIDDLE"),
-        ("LEFTPADDING",   (0,0), (-1,-1), 6),
-        ("RIGHTPADDING",  (0,0), (-1,-1), 6),
-        ("TOPPADDING",    (0,1), (-1,-1), 6),
-        ("BOTTOMPADDING", (0,1), (-1,-1), 6),
-        # Outer border
-        ("BOX",           (0,0), (-1,-1), 1, BORDER),
-        ("INNERGRID",     (0,1), (-1,-1), 0.3, BORDER),
+        ("BACKGROUND",    (0, 0), (-1, 0),  HEADER_BG),
+        ("TOPPADDING",    (0, 0), (-1, 0),  7),
+        ("BOTTOMPADDING", (0, 0), (-1, 0),  7),
+        ("LINEBELOW",     (0, 0), (-1, 0),  2, colors.HexColor("#F59E0B")),
+        ("FONTNAME",      (0, 0), (-1, -1), "Helvetica"),
+        ("FONTSIZE",      (0, 0), (-1, -1), 8),
+        ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING",   (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING",  (0, 0), (-1, -1), 6),
+        ("TOPPADDING",    (0, 1), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 1), (-1, -1), 6),
+        ("BOX",           (0, 0), (-1, -1), 1, BORDER),
+        ("INNERGRID",     (0, 1), (-1, -1), 0.3, BORDER),
     ])
 
     for s in row_styles:
@@ -281,9 +272,3 @@ def generate_pdf(rows, summary="", output_path="timetable.pdf"):
 
     doc.build(story)
     print(f"PDF saved → {output_path}")
-
-
-
-# rows, summary = load_timetable("timetable.json")
-# generate_pdf(rows, summary, output_path="my_timetable.pdf")
-# send_daily_nudge(rows, recipient_email=os.getenv("RECEIVER_EMAIL"))

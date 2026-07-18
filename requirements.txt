@@ -1,5 +1,5 @@
-streamlit
-pdfplumber
-reportlab
-groq
-python-dotenv
+streamlit>=1.59.0
+pdfplumber>=0.10.0
+reportlab>=4.0.0
+groq>=0.9.0
+python-dotenv>=1.0.0

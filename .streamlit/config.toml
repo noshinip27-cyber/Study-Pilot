@@ -1,0 +1,15 @@
+[server]
+# Allow connections from any host (required for Streamlit Cloud and tunnels)
+headless = true
+enableCORS = false
+enableXsrfProtection = false
+# Maximum upload size in MB (increase if users upload large syllabus PDFs)
+maxUploadSize = 50
+
+[browser]
+# Prevents the browser from opening automatically on `streamlit run`
+serverAddress = "localhost"
+gatherUsageStats = false
+
+[theme]
+base = "dark"
