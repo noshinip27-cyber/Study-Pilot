@@ -235,8 +235,11 @@ _COMPONENT_JS = """
 export default function ({ parentElement, setTriggerValue, data }) {
 
   /* ── First mount: inject the full StudyPilot page ─────────────────────── */
-  if (!parentElement._spMounted) {
-    parentElement._spMounted = true;
+  /* Use a window-level flag so reruns (st.rerun) don't re-inject the DOM.   */
+  /* Streamlit recreates the parentElement node on each rerun, but window    */
+  /* persists, so window._spMounted survives across Python reruns.           */
+  if (!window._spMounted) {
+    window._spMounted = true;
 
     var html = (data && data.pageHtml) ? data.pageHtml : '';
     parentElement.innerHTML = html;
@@ -261,6 +264,17 @@ export default function ({ parentElement, setTriggerValue, data }) {
       }
       orig.parentNode.replaceChild(s, orig);
     });
+  } else {
+    /* On reruns the parentElement is a fresh empty node — move the already- */
+    /* rendered app shell back into it without re-running any scripts.        */
+    if (window._spRoot && window._spRoot.parentNode !== parentElement) {
+      parentElement.appendChild(window._spRoot);
+    }
+  }
+
+  /* Store a reference to the rendered root so we can re-attach it on reruns */
+  if (!window._spRoot) {
+    window._spRoot = parentElement.firstElementChild || parentElement;
   }
 
   /* ── Subsequent renders: deliver API result to the waiting Promise ─────── */

@@ -36,12 +36,14 @@ const defaultTimetable = [
 ];
 
 // ============================================================
-// API BASE URL — resolves correctly whether running standalone
-// (port 8543) or embedded inside Streamlit iframe (port 8501)
+// API BASE URL
+// Always use relative paths ('/api/...') so the bridge in app.py
+// intercepts them correctly whether running on localhost or Streamlit Cloud.
+// Never point at a hardcoded port — there is no separate HTTP server.
 // ============================================================
-const API_BASE = window.location.port === '8543' ? '' : 'http://localhost:8543';
+const API_BASE = '';
 
-document.addEventListener('DOMContentLoaded', () => {
+function initApp() {
   // Clear stale completions from previous session
   localStorage.removeItem('studypilot-completions');
   appState.completions = {};
@@ -49,7 +51,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   setupEventListeners();
   loadInitialData();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 function initTheme() {
   document.documentElement.setAttribute('data-theme', appState.theme);
@@ -96,9 +104,49 @@ function setupEventListeners() {
     showToast('Viewing your active personalized study plan.');
   });
 
-  document.getElementById('btn-download-pdf').addEventListener('click', () => {
-    showToast('Downloading study_timetable_export.pdf...');
-    window.location.href = `${API_BASE}/api/download`;
+  document.getElementById('btn-download-pdf').addEventListener('click', async () => {
+    showToast('Preparing PDF…');
+    const btn = document.getElementById('btn-download-pdf');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="btn-icon">⏳</span> Preparing…';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/download`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Download failed (${res.status})`);
+      }
+
+      const data = await res.json();
+      if (!data || !data.base64) {
+        throw new Error('No PDF data returned from server.');
+      }
+
+      const bin = atob(data.base64);
+      const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      const blob = new Blob([arr], { type: 'application/pdf' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'StudyPilot_Timetable.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+      showToast('PDF downloaded!');
+    } catch (err) {
+      console.error('PDF download failed:', err);
+      showToast(`✗ ${err.message}`);
+    } finally {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
   });
 
   document.getElementById('btn-email-nudge').addEventListener('click', async () => {
@@ -256,12 +304,17 @@ function mapTimetableData(apiData) {
 }
 
 async function loadInitialData() {
-  // Clear any previous session data on every fresh page load
-  // so the user always starts with the welcome screen
-  try {
-    await fetch(`${API_BASE}/api/clear`);
-  } catch {
-    // server may not be ready yet — that's fine
+  // Only clear when this is a genuine first page load (not a Streamlit rerun).
+  // We detect a rerun by checking a sessionStorage flag that persists across
+  // Python-triggered reruns but is cleared on a real browser refresh.
+  const isRerun = sessionStorage.getItem('sp_initialized');
+  if (!isRerun) {
+    sessionStorage.setItem('sp_initialized', '1');
+    try {
+      await fetch(`${API_BASE}/api/clear`);
+    } catch {
+      // bridge may not be ready on very first load — safe to ignore
+    }
   }
   // Always start on the welcome screen — never auto-restore old plan
   hideDashboard();
