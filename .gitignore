@@ -1,5 +1,34 @@
+# Environment
 .env
-.venv
-__pycache__
-*.json
-*.pdf
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Generated PDFs
+timetable.pdf
+study_plan_dates_updated.pdf
+
+# Local data
+test-email.json
+timetable.json
+syllabus.json
+
+# OS
+.DS_Store
+Thumbs.db

@@ -5,7 +5,7 @@
  * Vite dev server on port 5173 proxies /api/* here.
  *
  * Credentials are read from .env in the project root:
- *   EMAIL_USER=noshinip27@gmail.com
+ *   EMAIL_USER=example@gmail.com
  *   EMAIL_PASS=xxxx xxxx xxxx xxxx   ← 16-char Gmail App Password
  */
 
